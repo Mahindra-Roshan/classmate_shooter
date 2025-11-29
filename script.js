@@ -246,15 +246,75 @@ canvas.addEventListener('touchend', e => {
   e.preventDefault(); input.pointer.down = false;
 }, { passive: false });
 
-/* mobile joystick (optional) */
+/* mobile joystick (multi-touch) */
 (function setupJoystick() {
   const joystickEl = document.getElementById('joystick');
   const stick = document.getElementById('stick');
   if (!joystickEl) return;
-  let active = false, cx = 0, cy = 0;
-  joystickEl.addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); active = true; const r = joystickEl.getBoundingClientRect(); cx = r.left + r.width / 2; cy = r.top + r.height / 2; });
-  joystickEl.addEventListener('touchmove', e => { e.stopPropagation(); if (!active) return; const t = e.touches[0]; const dx = (t.clientX - cx) / 40, dy = (t.clientY - cy) / 40; joystickEl._dx = clamp(dx, -1, 1); joystickEl._dy = clamp(dy, -1, 1); stick.style.transform = `translate(${joystickEl._dx * 22}px, ${joystickEl._dy * 22}px)`; });
-  joystickEl.addEventListener('touchend', e => { e.stopPropagation(); active = false; stick.style.transform = ''; joystickEl._dx = 0; joystickEl._dy = 0; });
+
+  let touchId = null;
+  let cx = 0, cy = 0;
+
+  joystickEl.addEventListener('touchstart', e => {
+    e.preventDefault(); e.stopPropagation();
+    if (touchId !== null) return; // Already active
+
+    const t = e.changedTouches[0];
+    touchId = t.identifier;
+
+    const r = joystickEl.getBoundingClientRect();
+    cx = r.left + r.width / 2;
+    cy = r.top + r.height / 2;
+
+    updateStick(t.clientX, t.clientY);
+  });
+
+  joystickEl.addEventListener('touchmove', e => {
+    e.preventDefault(); e.stopPropagation();
+    if (touchId === null) return;
+
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      if (e.changedTouches[i].identifier === touchId) {
+        updateStick(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
+        break;
+      }
+    }
+  });
+
+  const endDrag = (e) => {
+    e.preventDefault(); e.stopPropagation();
+    if (touchId === null) return;
+
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      if (e.changedTouches[i].identifier === touchId) {
+        touchId = null;
+        stick.style.transform = '';
+        joystickEl._dx = 0;
+        joystickEl._dy = 0;
+        break;
+      }
+    }
+  };
+
+  joystickEl.addEventListener('touchend', endDrag);
+  joystickEl.addEventListener('touchcancel', endDrag);
+
+  function updateStick(clientX, clientY) {
+    const maxDist = 40;
+    const dx = clientX - cx;
+    const dy = clientY - cy;
+    const dist = Math.hypot(dx, dy);
+    const scale = dist > maxDist ? maxDist / dist : 1;
+
+    const finalX = dx * scale;
+    const finalY = dy * scale;
+
+    stick.style.transform = `translate(${finalX}px, ${finalY}px)`;
+
+    // Normalize output -1 to 1
+    joystickEl._dx = finalX / maxDist;
+    joystickEl._dy = finalY / maxDist;
+  }
 })();
 
 /* ===================== ENTITIES & PARTICLES ===================== */
@@ -348,6 +408,14 @@ function beginGame() {
   notificationOverlay.style.display = 'none';
   bottomBar.style.display = 'none';
 
+  // Show mobile controls if applicable
+  if ('ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth < 900) {
+    const joy = document.getElementById('joystick');
+    const am = document.getElementById('actionsMobile');
+    if (joy) joy.style.display = 'block';
+    if (am) am.style.display = 'flex';
+  }
+
   // ensure pointer resets
   input.pointer.x = GAME.player.x; input.pointer.y = GAME.player.y; input.pointer.down = false;
 
@@ -365,6 +433,12 @@ function stopGame() {
   hud.style.display = 'none';
   notificationOverlay.style.display = 'none';
   bottomBar.style.display = 'none';
+
+  // Hide mobile controls
+  const joy = document.getElementById('joystick');
+  const am = document.getElementById('actionsMobile');
+  if (joy) joy.style.display = 'none';
+  if (am) am.style.display = 'none';
 }
 
 /* restart full: back to selection screen */
@@ -943,7 +1017,9 @@ function renderBombFlash() {
 /* minimap */
 /* minimap */
 function renderMiniMap() {
-  const mw = 200, mh = 200; // Square minimap
+  // Dynamic size: 20% of screen width, max 150px, min 80px
+  const size = Math.max(80, Math.min(150, GAME.viewW * 0.2));
+  const mw = size, mh = size;
   const px = GAME.viewW - mw - 20, py = 20;
 
   ctx.save();
@@ -1094,9 +1170,9 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidt
   if (ms) ms.addEventListener('touchend', e => { e.preventDefault(); e.stopPropagation(); input.pointer.down = false; });
   if (mb) mb.addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); doBomb(); });
 
-  // Show mobile controls
-  if (joy) joy.style.display = 'block';
-  if (am) am.style.display = 'flex';
+  // Show mobile controls - REMOVED from here, now handled in beginGame/stopGame
+  // if (joy) joy.style.display = 'block';
+  // if (am) am.style.display = 'flex';
 }
 
 /* initial state */

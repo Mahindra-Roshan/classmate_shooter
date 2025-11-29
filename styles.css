@@ -364,6 +364,13 @@ body {
 @media (max-width: 768px) {
   .selection-container {
     flex-direction: column;
+    overflow-y: auto;
+    /* Allow scrolling entire container if needed */
+  }
+
+  .col {
+    max-height: 40vh;
+    /* Limit height of columns so they don't overflow screen */
   }
 
   .menu-header h1 {
@@ -371,9 +378,22 @@ body {
   }
 
   #mainMenu {
-    height: 95vh;
-    width: 95%;
+    height: 98vh;
+    width: 98%;
+    padding: 10px;
   }
+
+  .actions-row {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+/* Fix volume slider alignment */
+.actions-row label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 /* Mobile Controls */
