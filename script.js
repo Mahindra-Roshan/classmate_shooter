@@ -233,9 +233,18 @@ function updateInputCoords(e) {
 canvas.addEventListener('mousedown', e => { updateInputCoords(e); input.pointer.down = true; firePlayerBullet(); });
 window.addEventListener('mouseup', e => input.pointer.down = false);
 canvas.addEventListener('mousemove', e => { updateInputCoords(e); });
-canvas.addEventListener('touchstart', e => { e.preventDefault(); updateInputCoords(e); input.pointer.down = true; firePlayerBullet(); }, { passive: false });
-canvas.addEventListener('touchmove', e => { e.preventDefault(); updateInputCoords(e); }, { passive: false });
-canvas.addEventListener('touchend', e => { e.preventDefault(); input.pointer.down = false; }, { passive: false });
+canvas.addEventListener('touchstart', e => {
+  // Ignore if touching controls
+  if (e.target.closest('.joystick') || e.target.closest('.action-btn')) return;
+  e.preventDefault(); updateInputCoords(e); input.pointer.down = true; firePlayerBullet();
+}, { passive: false });
+canvas.addEventListener('touchmove', e => {
+  if (e.target.closest('.joystick') || e.target.closest('.action-btn')) return;
+  e.preventDefault(); updateInputCoords(e);
+}, { passive: false });
+canvas.addEventListener('touchend', e => {
+  e.preventDefault(); input.pointer.down = false;
+}, { passive: false });
 
 /* mobile joystick (optional) */
 (function setupJoystick() {
@@ -243,9 +252,9 @@ canvas.addEventListener('touchend', e => { e.preventDefault(); input.pointer.dow
   const stick = document.getElementById('stick');
   if (!joystickEl) return;
   let active = false, cx = 0, cy = 0;
-  joystickEl.addEventListener('touchstart', e => { e.preventDefault(); active = true; const r = joystickEl.getBoundingClientRect(); cx = r.left + r.width / 2; cy = r.top + r.height / 2; });
-  joystickEl.addEventListener('touchmove', e => { if (!active) return; const t = e.touches[0]; const dx = (t.clientX - cx) / 40, dy = (t.clientY - cy) / 40; joystickEl._dx = clamp(dx, -1, 1); joystickEl._dy = clamp(dy, -1, 1); stick.style.transform = `translate(${joystickEl._dx * 22}px, ${joystickEl._dy * 22}px)`; });
-  joystickEl.addEventListener('touchend', e => { active = false; stick.style.transform = ''; joystickEl._dx = 0; joystickEl._dy = 0; });
+  joystickEl.addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); active = true; const r = joystickEl.getBoundingClientRect(); cx = r.left + r.width / 2; cy = r.top + r.height / 2; });
+  joystickEl.addEventListener('touchmove', e => { e.stopPropagation(); if (!active) return; const t = e.touches[0]; const dx = (t.clientX - cx) / 40, dy = (t.clientY - cy) / 40; joystickEl._dx = clamp(dx, -1, 1); joystickEl._dy = clamp(dy, -1, 1); stick.style.transform = `translate(${joystickEl._dx * 22}px, ${joystickEl._dy * 22}px)`; });
+  joystickEl.addEventListener('touchend', e => { e.stopPropagation(); active = false; stick.style.transform = ''; joystickEl._dx = 0; joystickEl._dy = 0; });
 })();
 
 /* ===================== ENTITIES & PARTICLES ===================== */
@@ -1075,14 +1084,15 @@ rageBtn.onclick = () => { if (GAME) respawnEnemies(); };
 // Removed legacy restartOverlayBtn, returnMenuBtn, restartBtn, closeRip logic
 
 /* mobile control wiring (shoot/bomb) */
-if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+if ('ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth < 900) {
   const ms = document.getElementById('mobileShoot');
   const mb = document.getElementById('mobileBombBtn');
   const joy = document.getElementById('joystick');
   const am = document.getElementById('actionsMobile');
 
-  if (ms) ms.addEventListener('touchstart', e => { e.preventDefault(); input.pointer.down = true; firePlayerBullet(); });
-  if (mb) mb.addEventListener('touchstart', e => { e.preventDefault(); doBomb(); });
+  if (ms) ms.addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); input.pointer.down = true; firePlayerBullet(); });
+  if (ms) ms.addEventListener('touchend', e => { e.preventDefault(); e.stopPropagation(); input.pointer.down = false; });
+  if (mb) mb.addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); doBomb(); });
 
   // Show mobile controls
   if (joy) joy.style.display = 'block';

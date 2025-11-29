@@ -375,3 +375,64 @@ body {
     width: 95%;
   }
 }
+
+/* Mobile Controls */
+.joystick {
+  position: absolute;
+  bottom: 40px;
+  left: 40px;
+  width: 120px;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  touch-action: none;
+  z-index: 1000;
+  display: none;
+  /* Shown via JS */
+}
+
+.stick {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50px;
+  height: 50px;
+  margin-top: -25px;
+  margin-left: -25px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  pointer-events: none;
+  transition: transform 0.1s;
+}
+
+.actions-mobile {
+  position: absolute;
+  bottom: 40px;
+  right: 40px;
+  display: none;
+  /* Shown via JS */
+  gap: 20px;
+  z-index: 1000;
+}
+
+.action-btn {
+  width: 70px;
+  height: 70px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  touch-action: none;
+  user-select: none;
+}
+
+.action-btn:active {
+  background: rgba(255, 255, 255, 0.4);
+  transform: scale(0.95);
+}
