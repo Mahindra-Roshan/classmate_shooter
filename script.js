@@ -540,6 +540,13 @@ function update(dt) {
     if (input.keys['arrowup'] || input.keys['w']) my -= 1;
     if (input.keys['arrowdown'] || input.keys['s']) my += 1;
 
+    // Mobile Joystick Input
+    const joystickEl = document.getElementById('joystick');
+    if (joystickEl && (joystickEl._dx || joystickEl._dy)) {
+      mx += joystickEl._dx || 0;
+      my += joystickEl._dy || 0;
+    }
+
     const norm = Math.hypot(mx, my) || 1;
     pv.vx = (mx / norm) * CONF.playerSpeed;
     pv.vy = (my / norm) * CONF.playerSpeed;
@@ -1068,11 +1075,18 @@ rageBtn.onclick = () => { if (GAME) respawnEnemies(); };
 // Removed legacy restartOverlayBtn, returnMenuBtn, restartBtn, closeRip logic
 
 /* mobile control wiring (shoot/bomb) */
-if ('ontouchstart' in window) {
+if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
   const ms = document.getElementById('mobileShoot');
   const mb = document.getElementById('mobileBombBtn');
-  if (ms) ms.addEventListener('touchstart', e => { e.preventDefault(); firePlayerBullet(); });
+  const joy = document.getElementById('joystick');
+  const am = document.getElementById('actionsMobile');
+
+  if (ms) ms.addEventListener('touchstart', e => { e.preventDefault(); input.pointer.down = true; firePlayerBullet(); });
   if (mb) mb.addEventListener('touchstart', e => { e.preventDefault(); doBomb(); });
+
+  // Show mobile controls
+  if (joy) joy.style.display = 'block';
+  if (am) am.style.display = 'flex';
 }
 
 /* initial state */
