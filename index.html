@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Classmate Shooter — Immersive Edition</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <!-- Game Canvas (Background) -->
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- UI Overlay Layer -->
+  <div id="ui-layer">
+
+    <!-- Main Menu / Setup (Glass Modal) -->
+    <div id="mainMenu" class="glass-panel interactive">
+      <div class="menu-header">
+        <h1>Classmate Shooter</h1>
+        <p>Select your character and enemies to begin the chaos.</p>
+      </div>
+
+      <div class="selection-container">
+        <!-- Player Select -->
+        <div class="col">
+          <div class="col-title">1. Choose Your Hero</div>
+          <div id="playerGrid" class="grid"></div>
+          <div style="margin-top:10px;">
+            <label style="font-size:0.9rem; color:#ccc; display:block; margin-bottom:4px;">Starting Weapon:</label>
+            <select id="startWeapon" class="glass-input"
+              style="width:100%; padding:8px; border-radius:6px; background:rgba(0,0,0,0.3); color:white; border:1px solid rgba(255,255,255,0.1);">
+              <option value="pistol">Pistol (Balanced)</option>
+              <option value="rifle">Rifle (Fast, Long Range)</option>
+              <option value="shotgun">Shotgun (Spread, Close Range)</option>
+            </select>
+          </div>
+          <div style="margin-top:10px;">
+            <label style="font-size:0.9rem; color:#ccc; display:block; margin-bottom:4px;">Difficulty:</label>
+            <select id="difficultySelect" class="glass-input"
+              style="width:100%; padding:8px; border-radius:6px; background:rgba(0,0,0,0.3); color:white; border:1px solid rgba(255,255,255,0.1);">
+              <option value="easy">Easy (Less Damage, Slower)</option>
+              <option value="medium" selected>Medium (Standard)</option>
+              <option value="hard">Hard (High Damage, Fast, Aggressive)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Enemy Select -->
+        <div class="col">
+          <div class="col-title">2. Choose Targets <button class="btn ghost small" id="selectAllBtn"
+              style="padding:2px 8px; font-size:0.7rem; margin-left:8px;">Select All</button></div>
+          <div id="enemyGrid" class="grid"></div>
+        </div>
+      </div>
+
+      <div class="actions-row">
+        <div style="flex:1; display:flex; align-items:center; gap:10px;">
+          <label style="font-size:0.8rem; color:#9ca3af;"><input type="checkbox" id="showFPS"> Show FPS</label>
+          <label style="font-size:0.8rem; color:#9ca3af;">Vol: <input type="range" id="soundVol" min="0" max="1"
+              step="0.1" value="0.6"></label>
+        </div>
+        <button class="btn ghost" id="randomBtn">Randomize</button>
+        <button class="btn" id="startBtn" disabled>Start Battle</button>
+      </div>
+    </div>
+
+    <!-- In-Game HUD (Hidden by default) -->
+    <div id="hud" style="display:none;">
+      <div class="hud-item" id="hpStat">HP: 100</div>
+      <div class="hud-item" id="ammoStat">Weapon: Pistol</div>
+      <div class="hud-item" id="bombStat">Bombs: 2</div>
+      <div class="hud-item" id="enemiesStat">Enemies: 0</div>
+    </div>
+
+    <!-- Notification Overlay (Victory/Defeat) -->
+    <div id="notificationOverlay">
+      <div class="notify-title" id="notifyTitle">VICTORY</div>
+      <div class="notify-sub" id="notifySub">All enemies eliminated</div>
+    </div>
+
+    <!-- Bottom Action Bar (Restart/Menu) -->
+    <div id="bottomBar" style="display:none;">
+      <button class="btn interactive" id="rageBtn">Rage This Again</button>
+      <button class="btn ghost interactive" id="backToMenu">Main Menu</button>
+    </div>
+
+  </div>
+
+  <!-- Mobile Controls (Joystick/Buttons) -->
+  <div id="joystick" class="joystick" style="display:none">
+    <div id="stick" class="stick"></div>
+  </div>
+  <div id="actionsMobile" class="actions-mobile" style="display:none">
+    <div id="mobileShoot" class="action-btn">●</div>
+    <div id="mobileBombBtn" class="action-btn">B</div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
